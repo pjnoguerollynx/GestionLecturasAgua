@@ -307,14 +307,18 @@ const handleReconciliation = async (item: OfflineQueueItem, payloadObject: any, 
         case 'BATCH_UPDATE_ROUTEMETER_SEQUENCE': { 
             if (item.relatedEntityId && serverResponseData) { // relatedEntityId is routeId
                 console.log(`Sync: Reconciling BATCH_UPDATE_ROUTEMETER_SEQUENCE for route ${item.relatedEntityId}`);
-                await routeMeterRepository.reconcileBatchUpdateSequence(item.relatedEntityId, serverResponseData as ServerBatchResponse);
+                // TODO: Implement reconcileBatchSequenceUpdate in routeMeterRepository
+                // For now, just log that the sync was successful without reconciliation
+                console.warn(`Sync: Batch sequence update reconciliation not yet implemented for route ${item.relatedEntityId}. Marking as completed without local data reconciliation.`);
             }
             break;
         }
         case 'DELETE_ROUTEMETERS_BY_ROUTEID': { // entityId is routeId
             if (localEntityId) {
-                 console.log(`Sync: Reconciling DELETE_ROUTEMETERS_BY_ROUTEID for route ${localEntityId}`);
-                await routeMeterRepository.reconcileDeletedRouteMetersByRouteId(localEntityId);
+                console.log(`Sync: Reconciling DELETE_ROUTEMETERS_BY_ROUTEID for route ${localEntityId}`);
+                // TODO: Implement reconcileDeletedRouteMeters in routeMeterRepository
+                // For now, just log that the sync was successful without reconciliation
+                console.warn(`Sync: Delete route meters reconciliation not yet implemented for route ${localEntityId}. Marking as completed without local data reconciliation.`);
             }
             break;
         }

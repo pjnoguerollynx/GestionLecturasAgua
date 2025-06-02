@@ -161,3 +161,155 @@ export const getRouteProgress = async (routeId: string): Promise<{
     throw error;
   }
 };
+
+// Add server interfaces for reconciliation
+export interface ServerRouteMeter {
+  routeId: string;
+  meterId: string;
+  sequenceOrder: number;
+  status: 'pending' | 'in_progress' | 'completed' | 'skipped';
+  visitDate?: string | null;
+  notes?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  version?: number;
+}
+
+export interface ServerBatchResponse {
+  routeId: string;
+  updatedMeters: ServerRouteMeter[];
+  success: boolean;
+  message?: string;
+}
+
+// Add reconciliation methods
+export const reconcileCreatedRouteMeter = async (localCompositeId: string, serverRouteMeter: ServerRouteMeter): Promise<void> => {
+  const db = getDBConnection();
+  if (!db) throw new Error('Database not open.');
+
+  const lastModified = Math.floor(new Date(serverRouteMeter.updatedAt).getTime() / 1000);
+
+  const query = `
+    UPDATE RouteMeters
+    SET sequenceOrder = ?, status = ?, visitDate = ?, notes = ?,
+        syncStatus = 'synced', lastModified = ?
+    WHERE routeId = ? AND meterId = ?;
+  `;
+  
+  const params = [
+    serverRouteMeter.sequenceOrder,
+    serverRouteMeter.status,
+    serverRouteMeter.visitDate,
+    serverRouteMeter.notes,
+    lastModified,
+    serverRouteMeter.routeId,
+    serverRouteMeter.meterId
+  ];
+
+  try {
+    await executeSql(query, params);
+    console.log(`RouteMeter ${localCompositeId} reconciled with server data`);
+  } catch (error) {
+    console.error(`Error reconciling created RouteMeter ${localCompositeId}:`, error);
+    throw error;
+  }
+};
+
+export const reconcileUpdatedRouteMeter = async (routeId: string, meterId: string, serverRouteMeter: ServerRouteMeter): Promise<void> => {
+  const db = getDBConnection();
+  if (!db) throw new Error('Database not open.');
+
+  const lastModified = Math.floor(new Date(serverRouteMeter.updatedAt).getTime() / 1000);
+
+  const query = `
+    UPDATE RouteMeters
+    SET sequenceOrder = ?, status = ?, visitDate = ?, notes = ?,
+        syncStatus = 'synced', lastModified = ?
+    WHERE routeId = ? AND meterId = ?;
+  `;
+  
+  const params = [
+    serverRouteMeter.sequenceOrder,
+    serverRouteMeter.status,
+    serverRouteMeter.visitDate,
+    serverRouteMeter.notes,
+    lastModified,
+    routeId,
+    meterId
+  ];
+
+  try {
+    await executeSql(query, params);
+    console.log(`RouteMeter ${routeId}/${meterId} reconciled with server data`);
+  } catch (error) {
+    console.error(`Error reconciling updated RouteMeter ${routeId}/${meterId}:`, error);
+    throw error;
+  }
+};
+
+export const reconcileDeletedRouteMeter = async (routeId: string, meterId: string): Promise<void> => {
+  const db = getDBConnection();
+  if (!db) throw new Error('Database not open.');
+
+  const query = "DELETE FROM RouteMeters WHERE routeId = ? AND meterId = ?;";
+  
+  try {
+    await executeSql(query, [routeId, meterId]);
+    console.log(`RouteMeter ${routeId}/${meterId} confirmed deleted locally after server reconciliation`);
+  } catch (error) {
+    console.error(`Error deleting RouteMeter ${routeId}/${meterId} during reconciliation:`, error);
+    throw error;
+  }
+};
+
+export const reconcileBatchSequenceUpdate = async (routeId: string, payload: any, serverResponse: ServerBatchResponse): Promise<void> => {
+  const db = getDBConnection();
+  if (!db) throw new Error('Database not open.');
+
+  if (!serverResponse.success) {
+    console.warn(`Batch sequence update for route ${routeId} failed on server: ${serverResponse.message}`);
+    return;
+  }
+
+  try {
+    // Update each meter's sequence order based on server response
+    for (const serverMeter of serverResponse.updatedMeters) {
+      const lastModified = Math.floor(new Date(serverMeter.updatedAt).getTime() / 1000);
+      
+      const query = `
+        UPDATE RouteMeters
+        SET sequenceOrder = ?, syncStatus = 'synced', lastModified = ?
+        WHERE routeId = ? AND meterId = ?;
+      `;
+      
+      const params = [
+        serverMeter.sequenceOrder,
+        lastModified,
+        serverMeter.routeId,
+        serverMeter.meterId
+      ];
+
+      await executeSql(query, params);
+    }
+    
+    console.log(`Batch sequence update for route ${routeId} reconciled successfully`);
+  } catch (error) {
+    console.error(`Error reconciling batch sequence update for route ${routeId}:`, error);
+    throw error;
+  }
+};
+
+export const reconcileDeletedRouteMeters = async (routeId: string): Promise<void> => {
+  const db = getDBConnection();
+  if (!db) throw new Error('Database not open.');
+
+  const query = "DELETE FROM RouteMeters WHERE routeId = ?;";
+  
+  try {
+    const result = await executeSql(query, [routeId]);
+    console.log(`All RouteMeters for route ${routeId} confirmed deleted locally after server reconciliation. Rows affected: ${result.rowsAffected}`);
+  } catch (error) {
+    console.error(`Error deleting RouteMeters for route ${routeId} during reconciliation:`, error);
+    throw error;
+  }
+};
