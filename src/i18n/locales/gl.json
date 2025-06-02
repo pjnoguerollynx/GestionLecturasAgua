@@ -1,0 +1,23 @@
+{
+  "login": {
+    "title": "Inicio de Sesión",
+    "goToHome": "Ir á Principal",
+    "usernamePlaceholder": "Usuario",
+    "passwordPlaceholder": "Contrasinal",
+    "loginButton": "Iniciar Sesión",
+    "errorTitle": "Erro de Inicio de Sesión",
+    "errorMessage": "Credenciais incorrectas. Por favor, téntao de novo."
+  },
+  "home": {
+    "title": "Pantalla Principal",
+    "welcomeMessage": "Benvido á aplicación de Xestión de Lecturas de Auga.",
+    "logoutButton": "Pechar Sesión"
+  },
+  "languageSelector": {
+    "select": "Seleccionar Idioma",
+    "changeTo": "Cambiar idioma a {{lang}}"
+  },
+  "common": {
+    "loading": "Cargando..."
+  }
+}

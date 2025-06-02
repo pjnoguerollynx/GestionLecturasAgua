@@ -1,0 +1,121 @@
+{
+  "login": {
+    "title": "Login",
+    "goToHome": "Go to Home",
+    "usernamePlaceholder": "Username",
+    "passwordPlaceholder": "Password",
+    "loginButton": "Login",
+    "errorTitle": "Login Error",
+    "errorMessage": "Invalid credentials. Please try again.",
+    "logoAltText": "Application Logo",
+    "usernameHint": "Enter your assigned username",
+    "passwordHint": "Enter your password",
+    "loading": "Logging in..."
+  },
+  "home": {
+    "title": "Home Screen",
+    "welcomeMessage": "Welcome to the Water Meter Reading Management application.",
+    "logoutButton": "Logout",
+    "featuresLabel": "Main Features",
+    "featuresHintText": "Select an option to continue:"
+  },
+  "languageSelector": {
+    "select": "Select Language",
+    "changeTo": "Change language to {{lang}}"
+  },
+  "common": {
+    "loading": "Loading...",
+    "goBack": "Go Back",
+    "cancel": "Cancel",
+    "retry": "Retry",
+    "showingStaleData": "Showing local data. There was an error updating."
+  },
+  "homeScreen": {
+    "title": "Home",
+    "welcome": "Welcome",
+    "navigateToRoutes": "Manage Routes",
+    "navigateToMeters": "Manage Meters",
+    "navigateToIncidents": "Manage Incidents",
+    "navigateToSettings": "Settings",
+    "logout": "Logout"
+  },
+  "routesScreen": {
+    "title": "Routes"
+  },
+  "metersScreen": {
+    "title": "Meters"
+  },
+  "incidentsScreen": {
+    "title": "Incidents",
+    "loadError": "Error loading incidents",
+    "loadErrorTitle": "Loading Error",
+    "loadErrorMessage": "Could not load incidents. Please check your connection or try again later.",
+    "incidentDescription": "Incident description",
+    "navigateToDetailHint": "Tap to view incident details",
+    "descriptionLabel": "Description",
+    "dateLabel": "Date",
+    "severityLabel": "Severity",
+    "statusLabel": "Status",
+    "addIncident": "Add new incident",
+    "navigateToAddIncidentHint": "Navigate to create incident screen",
+    "addIncidentButton": "New Incident",
+    "noIncidents": "No incidents recorded."
+  },
+  "createIncidentScreen": {
+    "permissionDeniedTitle": "Permission Denied",
+    "permissionDeniedMessage": "You need to grant gallery access permissions to select an image.",
+    "locationPermissionDenied": "Location permission denied.",
+    "locationPermissionDeniedMessage": "To record the incident location, please grant location permissions.",
+    "locationFetchError": "Error fetching location.",
+    "errorTitle": "Error",
+    "locationFetchErrorMessage": "Could not fetch current location. Please try again.",
+    "validationErrorTitle": "Validation Error",
+    "descriptionRequired": "Description is required.",
+    "successTitle": "Success",
+    "successMessage": "Incident created successfully.",
+    "errorMessage": "Could not save incident. Please try again.",
+    "title": "Create New Incident",
+    "descriptionLabel": "Incident Description",
+    "descriptionPlaceholder": "Enter incident details...",
+    "severityLabel": "Severity",
+    "refreshLocation": "Refresh Location",
+    "getLocation": "Get Current Location",
+    "latitudeLabel": "Latitude",
+    "longitudeLabel": "Longitude",
+    "photoLabel": "Photo (Optional)",
+    "changeImage": "Change Image",
+    "attachImage": "Attach Image",
+    "submitButton": "Save Incident"
+  },
+  "incidentDetailScreen": {
+    "title": "Incident Detail",
+    "notFound": "Incident not found.",
+    "errorTitle": "Error",
+    "notFoundMessage": "The requested incident could not be found. It may have been deleted or the ID is incorrect.",
+    "loadError": "Error loading incident details.",
+    "loadErrorMessage": "Could not load incident details. Please try again.",
+    "meterIdLabel": "Associated Meter ID",
+    "resolvedDateLabel": "Resolved Date",
+    "notesLabel": "Additional Notes",
+    "locationLabel": "Location (Lat, Lon)",
+    "openMap": "Open in map",
+    "photosLabel": "Attached Photos",
+    "mapErrorTitle": "Map Error",
+    "mapErrorMessage": "Could not open map application."
+  },
+  "settingsScreen": {
+    "title": "Settings"
+  },
+  "incidentSeverity": {
+    "low": "Low",
+    "medium": "Medium",
+    "high": "High"
+  },
+  "incidentStatus": {
+    "open": "Open",
+    "in_progress": "In Progress",
+    "resolved": "Resolved",
+    "closed": "Closed",
+    "pending": "Pending"
+  }
+}

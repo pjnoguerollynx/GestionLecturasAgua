@@ -1,0 +1,23 @@
+{
+  "login": {
+    "title": "Saioa Hasi",
+    "goToHome": "Joan Nagusira",
+    "usernamePlaceholder": "Erabiltzailea",
+    "passwordPlaceholder": "Pasahitza",
+    "loginButton": "Saioa Hasi",
+    "errorTitle": "Saioa Hasteko Errorea",
+    "errorMessage": "Kredentzial okerrak. Mesedez, saiatu berriro."
+  },
+  "home": {
+    "title": "Pantaila Nagusia",
+    "welcomeMessage": "Ongi etorri Uraren Irakurketak Kudeatzeko aplikaziora.",
+    "logoutButton": "Saioa Itxi"
+  },
+  "languageSelector": {
+    "select": "Hautatu Hizkuntza",
+    "changeTo": "Aldatu hizkuntza hona: {{lang}}"
+  },
+  "common": {
+    "loading": "Kargatzen..."
+  }
+}

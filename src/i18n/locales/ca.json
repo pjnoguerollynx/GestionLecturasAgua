@@ -1,0 +1,23 @@
+{
+  "login": {
+    "title": "Inici de Sessió",
+    "goToHome": "Anar a Principal",
+    "usernamePlaceholder": "Usuari",
+    "passwordPlaceholder": "Contrasenya",
+    "loginButton": "Iniciar Sessió",
+    "errorTitle": "Error d'Inici de Sessió",
+    "errorMessage": "Credencials incorrectes. Si us plau, torna-ho a provar."
+  },
+  "home": {
+    "title": "Pantalla Principal",
+    "welcomeMessage": "Benvingut a l'aplicació de Gestió de Lectures d'Aigua.",
+    "logoutButton": "Tancar Sessió"
+  },
+  "languageSelector": {
+    "select": "Selecciona Idioma",
+    "changeTo": "Canviar idioma a {{lang}}"
+  },
+  "common": {
+    "loading": "Carregant..."
+  }
+}
