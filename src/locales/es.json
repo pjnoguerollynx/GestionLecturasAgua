@@ -238,7 +238,10 @@
     "goBack": "Volver",
     "loadingMeters": "Cargando contadores...",
     "loadingRoutes": "Cargando rutas...",
-    "submit": "Enviar"
+    "submit": "Enviar",
+    "lastModified": "Última Modificación",
+    "location": "Ubicación",
+    "notes": "Notas"
   },
   "meterDetailScreen": {
     "title": "Detalle del Contador",
@@ -269,7 +272,14 @@
       "dangerousArea": "El área del contador es peligrosa.",
       "meterDamaged": "El contador está dañado.",
       "other": "Otro problema de acceso."
-    }
+    },
+    "relatedIncidents": "Incidencias Relacionadas",
+    "readingsHistory": "Historial de Lecturas",
+    "location": "Ubicación",
+    "errorFetchingIncidents": "Error al cargar incidencias relacionadas.",
+    "errorFetchingMeter": "Error al cargar datos del contador.",
+    "meterNotFound": "Contador no encontrado.",
+    "noIncidentsFound": "No se encontraron incidencias para este contador."
   },
   "metersScreen": {
     "serialNumber": "Número de Serie",
@@ -282,5 +292,42 @@
     "noMetersMatchSearch": "No se encontraron contadores que coincidan con su búsqueda.",
     "noMetersFoundForRoute": "No se encontraron contadores para la ruta: {{routeName}}.",
     "noMetersFound": "No se encontraron contadores."
+  },
+  "incidentDetailScreen": {
+    "title": "Detalle de Incidencia",
+    "notFound": "Incidencia no encontrada.",
+    "errorTitle": "Error",
+    "notFoundMessage": "La incidencia solicitada no pudo ser encontrada. Puede haber sido eliminada o el ID es incorrecto.",
+    "loadError": "Error al cargar detalles de la incidencia.",
+    "loadErrorMessage": "No se pudieron cargar los detalles de la incidencia. Por favor, inténtalo de nuevo.",
+    "mainDetails": "Detalles Principales",
+    "additionalInfo": "Información Adicional",
+    "resolutionDetails": "Detalles de Resolución",
+    "meterIdLabel": "ID de Contador Asociado",
+    "routeIdLabel": "ID de Ruta Asociada",
+    "resolvedDateLabel": "Fecha de Resolución",
+    "notesLabel": "Notas Adicionales",
+    "locationLabel": "Ubicación (Lat, Lon)",
+    "openMap": "Abrir en mapa",
+    "photosLabel": "Fotos Adjuntas",
+    "mapErrorTitle": "Error de Mapa",
+    "mapErrorMessage": "No se pudo abrir la aplicación de mapas.",
+    "dateLabel": "Fecha",
+    "statusLabel": "Estado",
+    "severityLabel": "Gravedad"
+  },
+  "incidentStatus": {
+    "open": "Abierta",
+    "in_progress": "En Progreso",
+    "resolved": "Resuelta",
+    "closed": "Cerrada",
+    "pending": "Pendiente"
+  },
+  "syncStatus": {
+    "pending": "Pendiente",
+    "synced": "Sincronizado",
+    "failed": "Fallido",
+    "error": "Error",
+    "conflicted": "En conflicto"
   }
 }

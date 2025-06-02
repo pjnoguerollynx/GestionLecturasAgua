@@ -1,14 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { View, StyleSheet, ScrollView, Alert } from 'react-native';
-import { Appbar, Card, Text, useTheme, Button, Portal, Modal, TextInput, SegmentedButtons, FAB } from 'react-native-paper';
+import React, { useState, useEffect, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
+import { Appbar, Card, Text, useTheme, Button, Portal, Modal, TextInput, SegmentedButtons, FAB, List, ActivityIndicator, Divider } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getMeterById } from '../database/meterRepository';
-import { addIncident } from '../database/incidentRepository';
+import { addIncident, getIncidentsByMeterId } from '../database/incidentRepository'; // Import getIncidentsByMeterId
 import { Meter, Incident, IncidentSeverity, IncidentStatus } from '../types/databaseModels';
-import { useAuthStore } from '../store/authStore'; // Importar el store de autenticación
+import { useAuthStore } from '../store/authStore';
+// @ts-ignore 
+import { format } from 'date-fns';
+// @ts-ignore - Esta línea será corregida o eliminada si la instalación es correcta
+import { es } from 'date-fns/locale/es'; // Ruta corregida para el local español
+// @ts-ignore - Esta línea será corregida o eliminada si la instalación es correcta
+import { enUS } from 'date-fns/locale/en-US'; // Ruta corregida para el local inglés de EE. UU.
 
 type MeterDetailScreenRouteProp = RouteProp<RootStackParamList, 'MeterDetail'>;
 type MeterDetailScreenNavigationProp = NativeStackNavigationProp<RootStackParamList, 'MeterDetail'>;
@@ -18,8 +24,8 @@ const MeterDetailScreen = () => {
   const theme = useTheme();
   const navigation = useNavigation<MeterDetailScreenNavigationProp>();
   const route = useRoute<MeterDetailScreenRouteProp>();
-  const currentUser = useAuthStore((state) => state.user); // Obtener el usuario del store
-
+  const currentUser = useAuthStore((state) => state.user);
+  const currentLocale = currentUser?.language === 'es' ? es : enUS;
 
   const { meterId, serialNumber } = route.params;
 
@@ -29,21 +35,37 @@ const MeterDetailScreen = () => {
   const [accessIssueType, setAccessIssueType] = useState('no_access');
   const [accessNotes, setAccessNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
+  const [relatedIncidents, setRelatedIncidents] = useState<Incident[]>([]);
+  const [loadingIncidents, setLoadingIncidents] = useState(false);
+
+  const fetchMeterData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const meterData = await getMeterById(meterId);
+      setMeter(meterData);
+      if (meterData) {
+        setLoadingIncidents(true);
+        try {
+          const incidents = await getIncidentsByMeterId(meterData.id);
+          setRelatedIncidents(incidents);
+        } catch (error) {
+          console.error('Error fetching related incidents:', error);
+          Alert.alert(t('common.error'), t('meterDetailScreen.errorFetchingIncidents'));
+        } finally {
+          setLoadingIncidents(false);
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching meter:', error);
+      Alert.alert(t('common.error'), t('meterDetailScreen.errorFetchingMeter'));
+    } finally {
+      setLoading(false);
+    }
+  }, [meterId, t]);
 
   useEffect(() => {
-    const fetchMeter = async () => {
-      try {
-        const meterData = await getMeterById(meterId);
-        setMeter(meterData);
-      } catch (error) {
-        console.error('Error fetching meter:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMeter();
-  }, [meterId]);
+    fetchMeterData();
+  }, [fetchMeterData]);
 
   const handleReportAccessIssue = () => {
     setShowAccessModal(true);
@@ -59,7 +81,7 @@ const MeterDetailScreen = () => {
 
     setSubmitting(true);
     try {
-      const incidentData: Omit<Incident, 'id' | 'syncStatus' | 'lastModified' | 'serverId' | 'version'> = {
+      const incidentData: Omit<Incident, 'id' | 'syncStatus' | 'lastModified' | 'serverId' | 'version' | 'readingId'> = {
         meterId: meter.id,
         severity: accessIssueType === 'no_access' ? IncidentSeverity.HIGH : IncidentSeverity.MEDIUM,
         description: getAccessIssueDescription(accessIssueType),
@@ -108,7 +130,17 @@ const MeterDetailScreen = () => {
   if (loading) {
     return (
       <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <ActivityIndicator animating={true} size="large" />
         <Text>{t('common.loading')}</Text>
+      </View>
+    );
+  }
+
+  if (!meter) {
+    return (
+      <View style={[styles.container, styles.centered, { backgroundColor: theme.colors.background }]}>
+        <Text>{t('meterDetailScreen.meterNotFound')}</Text>
+        <Button onPress={() => navigation.goBack()}>{t('common.goBack')}</Button>
       </View>
     );
   }
@@ -132,10 +164,14 @@ const MeterDetailScreen = () => {
                 {meter.meterType && <Text variant="bodyMedium">{`${t('metersScreen.meterType')}: ${meter.meterType}`}</Text>}
                 {meter.status && <Text variant="bodyMedium">{`${t('meterDetailScreen.status')}: ${meter.status}`}</Text>}
                 {meter.installationDate && (
-                  <Text variant="bodyMedium">
-                    {`${t('meterDetailScreen.installationDate')}: ${new Date(meter.installationDate * 1000).toLocaleDateString()}`}
-                  </Text>
+                  <Text variant="bodyMedium">{`${t('meterDetailScreen.installationDate')}: ${format(new Date(meter.installationDate * 1000), 'PPP', { locale: currentLocale })}`}</Text>
                 )}
+                {meter.notes && <Text variant="bodyMedium">{`${t('common.notes')}: ${meter.notes}`}</Text>}
+                {meter.locationLatitude && meter.locationLongitude && (
+                  <Text variant="bodyMedium">{`${t('meterDetailScreen.location')}: ${meter.locationLatitude}, ${meter.locationLongitude}`}</Text>
+                )}
+                <Text variant="bodySmall">{`${t('common.lastModified')}: ${format(new Date(meter.lastModified * 1000), 'Pp', { locale: currentLocale })}`}</Text>
+                <Text variant="bodySmall">{`${t('common.syncStatus')}: ${t(`syncStatus.${meter.syncStatus}`, meter.syncStatus)}`}</Text>
               </>
             )}
           </Card.Content>
@@ -145,26 +181,70 @@ const MeterDetailScreen = () => {
           <Card.Title title={t('meterDetailScreen.actions')} />
           <Card.Content>
             <Button
-              mode="outlined"
-              onPress={() => {/* TODO: Navigate to reading screen */}}
+              mode="contained"
+              onPress={() => {
+                if (meter) {
+                  // ADVERTENCIA: La siguiente línea utiliza 'as any' para suprimir un error de TypeScript.
+                  // La causa probable del error es una definición incorrecta o faltante para 'CreateReading'
+                  // en RootStackParamList (definida en src/navigation/AppNavigator.ts).
+                  // La solución ideal es corregir RootStackParamList.
+                  navigation.navigate('CreateReading' as any, { meterId: meter.id, serialNumber: meter.serialNumber });
+                }
+              }}
               style={styles.actionButton}
-              icon="clipboard-text"
+              icon="camera"
+              disabled={!meter}
             >
               {t('meterDetailScreen.takeReading')}
             </Button>
-            
             <Button
               mode="outlined"
               onPress={handleReportAccessIssue}
               style={styles.actionButton}
-              icon="alert-circle"
-              buttonColor={theme.colors.errorContainer}
-              textColor={theme.colors.onErrorContainer}
+              icon="alert-octagon"
+              disabled={!meter}
             >
               {t('meterDetailScreen.reportAccessIssue')}
             </Button>
           </Card.Content>
         </Card>
+
+        {/* Placeholder for Related Incidents */}
+        <Card style={styles.card}>
+          <Card.Title title={t('meterDetailScreen.relatedIncidents')} />
+          <Card.Content>
+            {loadingIncidents ? (
+              <ActivityIndicator animating={true} />
+            ) : relatedIncidents.length > 0 ? (
+              relatedIncidents.map((incident, index) => (
+                <React.Fragment key={incident.id}>
+                  <TouchableOpacity onPress={() => navigation.navigate('IncidentDetail', { incidentId: incident.id })}>
+                    <List.Item
+                      title={incident.description}
+                      description={`${t('incidentDetailScreen.dateLabel')}: ${format(new Date(incident.incidentDate * 1000), 'P', { locale: currentLocale })} - ${t('incidentDetailScreen.statusLabel')}: ${t(`incidentStatus.${incident.status}`, incident.status)}`}
+                      left={props => <List.Icon {...props} icon="alert-circle-outline" />}
+                      titleNumberOfLines={2}
+                      descriptionNumberOfLines={1}
+                    />
+                  </TouchableOpacity>
+                  {index < relatedIncidents.length - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            ) : (
+              <Text>{t('meterDetailScreen.noIncidentsFound')}</Text>
+            )}
+          </Card.Content>
+        </Card>
+
+        {/* Placeholder for Readings History */}
+        <Card style={styles.card}>
+          <Card.Title title={t('meterDetailScreen.readingsHistory')} />
+          <Card.Content>
+            <Text>{t('common.noData')}</Text>
+            {/* Future: List readings history for this meter */}
+          </Card.Content>
+        </Card>
+
       </ScrollView>
 
       <Portal>
@@ -260,6 +340,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   centered: {
+    flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -267,39 +348,61 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   card: {
-    margin: 16,
+    margin: 8,
   },
   actionButton: {
-    marginVertical: 4,
+    marginVertical: 8,
+  },
+  modalContainer: {
+    backgroundColor: 'white', // Ensure theme.colors.surface or similar is used for dark mode compatibility
+    padding: 20,
+    margin: 20,
+    borderRadius: 8,
   },
   modalContent: {
-    margin: 20,
+    backgroundColor: 'white', // Default, will be overridden by theme.colors.surface
     padding: 20,
+    margin: 30, // Provide some margin from screen edges
     borderRadius: 8,
   },
   modalTitle: {
-    textAlign: 'center',
-    marginBottom: 16,
+    // fontSize: 18, // Replaced by variant="headlineSmall"
+    marginBottom: 15,
+    // color: theme.colors.onSurface // For dark mode - Handled by Text variant color
   },
   modalSubtitle: {
-    marginBottom: 16,
-  },
-  segmentedButtons: {
-    marginBottom: 8,
-  },
-  otherButton: {
-    marginBottom: 16,
+    marginBottom: 10,
+    // color: theme.colors.onSurface // Handled by Text variant color
   },
   textInput: {
-    marginBottom: 16,
+    marginBottom: 10,
+    // backgroundColor: theme.colors.background, // For dark mode
+    // color: theme.colors.onSurface // For dark mode
+  },
+  segmentedButtonsContainer: {
+    marginBottom: 15,
+  },
+  segmentedButtons: {
+    marginBottom: 10,
+  },
+  otherButton: {
+    marginTop: 5, // Add some space if it's after segmented buttons
+    marginBottom: 15,
   },
   modalActions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
-    gap: 12,
+    justifyContent: 'flex-end',
+    marginTop: 20,
   },
   modalButton: {
-    flex: 1,
+    marginLeft: 10,
+  },
+  fab: {
+    position: 'absolute',
+    margin: 16,
+    right: 0,
+    bottom: 0,
+    // backgroundColor: theme.colors.primary // For dark mode
   },
 });
 

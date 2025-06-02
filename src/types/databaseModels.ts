@@ -55,6 +55,7 @@ export interface Incident {
   serverId?: string;
   meterId?: string; // Made meterId optional
   routeId?: string;
+  readingId?: string; // Added readingId
   incidentDate: number; // Unix timestamp
   resolvedDate?: number; // Unix timestamp
   description: string;
@@ -75,6 +76,7 @@ export interface ServerIncident extends Omit<Incident, 'syncStatus' | 'lastModif
   // serverId is already optional in Incident, but for server-originated data, it should ideally exist.
   // If the server uses 'id' as its primary key and it maps to client's 'serverId', adjust accordingly.
   // For now, assuming ServerIncident largely mirrors Incident, excluding local-only fields.
+  // readingId will be inherited from Incident via Omit if not excluded.
 }
 
 export interface Route {
@@ -96,7 +98,7 @@ export interface RouteMeter {
     routeId: string;
     meterId: string;
     sequenceOrder: number;
-    status: 'pending' | 'completed' | 'skipped' | 'unable_to_locate';
+    status: 'pending' | 'in_progress' | 'completed' | 'skipped' | 'unable_to_locate'; // Standardized status
     visitDate?: number; // Unix timestamp
     notes?: string;
     syncStatus: SyncStatusType;

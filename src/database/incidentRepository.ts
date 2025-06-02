@@ -10,6 +10,7 @@ const mapRowToIncident = (row: any): Incident => {
     serverId: row.serverId, // Added
     meterId: row.meterId,
     routeId: row.routeId, // Changed from readingId
+    readingId: row.readingId, // Added readingId
     incidentDate: row.incidentDate,
     resolvedDate: row.resolvedDate, // Added resolvedDate
     description: row.description,
@@ -38,17 +39,18 @@ export const addIncident = async (incidentData: Omit<Incident, 'id' | 'serverId'
   if (!db) {
     throw new Error('Database not open. Call openDatabase first.');
   }
-  const newId = uuid.v4(); // Removed 'as string'
+  const newId = uuid.v4() as string;
 
   const query = `
-    INSERT INTO Incidents (id, meterId, routeId, incidentDate, description, severity, status, photos, notes, latitude, longitude, userId, syncStatus, lastModified, version)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', strftime('%s', 'now'), 1);
+    INSERT INTO Incidents (id, meterId, routeId, readingId, incidentDate, description, severity, status, photos, notes, latitude, longitude, userId, syncStatus, lastModified, version)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', strftime('%s', 'now'), 1);
   `;
 
   const params = [
     newId,
     incidentData.meterId,
-    incidentData.routeId, // Changed from readingId
+    incidentData.routeId, 
+    incidentData.readingId, // Added readingId
     incidentData.incidentDate,
     incidentData.description,
     incidentData.severity, // Changed from incidentType
@@ -382,7 +384,7 @@ export const reconcileCreatedIncident = async (localId: string, serverIncident: 
     return;
   }
 
-  const query = "UPDATE Incidents SET serverId = ?, syncStatus = 'synced', description = ?, severity = ?, status = ?, photos = ?, notes = ?, incidentDate = ?, resolvedDate = ?, meterId = ?, routeId = ?, latitude = ?, longitude = ?, userId = ?, version = ?, lastModified = strftime('%s', 'now') WHERE id = ?;";
+  const query = "UPDATE Incidents SET serverId = ?, syncStatus = 'synced', description = ?, severity = ?, status = ?, photos = ?, notes = ?, incidentDate = ?, resolvedDate = ?, meterId = ?, routeId = ?, readingId = ?, latitude = ?, longitude = ?, userId = ?, version = ?, lastModified = strftime('%s', 'now') WHERE id = ?;";
   const params = [
     serverId,
     serverIncident.description,
@@ -394,6 +396,7 @@ export const reconcileCreatedIncident = async (localId: string, serverIncident: 
     serverIncident.resolvedDate,
     serverIncident.meterId,
     serverIncident.routeId,
+    serverIncident.readingId, // Added readingId
     serverIncident.latitude,
     serverIncident.longitude,
     serverIncident.userId,
@@ -433,7 +436,7 @@ export const reconcileUpdatedIncident = async (localId: string, serverIncident: 
   // For now, we assume localId is the correct reference.
   // serverIncident.id should be the authoritative ID from the server.
 
-  const query = "UPDATE Incidents SET syncStatus = 'synced', description = ?, severity = ?, status = ?, photos = ?, notes = ?, incidentDate = ?, resolvedDate = ?, meterId = ?, routeId = ?, latitude = ?, longitude = ?, userId = ?, version = ?, serverId = ?, lastModified = strftime('%s', 'now') WHERE id = ?;";
+  const query = "UPDATE Incidents SET syncStatus = 'synced', description = ?, severity = ?, status = ?, photos = ?, notes = ?, incidentDate = ?, resolvedDate = ?, meterId = ?, routeId = ?, readingId = ?, latitude = ?, longitude = ?, userId = ?, version = ?, serverId = ?, lastModified = strftime('%s', 'now') WHERE id = ?;";
   const params = [
     serverIncident.description,
     serverIncident.severity,
@@ -444,6 +447,7 @@ export const reconcileUpdatedIncident = async (localId: string, serverIncident: 
     serverIncident.resolvedDate,
     serverIncident.meterId,
     serverIncident.routeId,
+    serverIncident.readingId, // Added readingId
     serverIncident.latitude,
     serverIncident.longitude,
     serverIncident.userId,

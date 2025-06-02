@@ -26,7 +26,7 @@ const apiLogin = async (username: string, password: string): Promise<LoginRespon
     return new Promise(resolve => setTimeout(() => resolve({
       accessToken: 'mock-access-token',
       refreshToken: 'mock-refresh-token',
-      user: { id: 'mock-user-id', username: username, name: 'Mock User', email: `${username}@example.com` }
+      user: { id: 'mock-user-id', username: username, name: 'Mock User', email: `${username}@example.com`, language: 'es' } // Added language
     }), 500));
   }
   console.log('Attempting real login for:', username);
@@ -68,7 +68,7 @@ const fetchUserProfile = async (): Promise<User | null> => {
     console.log('AUTH_SERVICE: MOCK fetchUserProfile');
     const currentUser = useAuthStore.getState().user; // Try to use existing user from store if available
     return new Promise(resolve => setTimeout(() => resolve(
-      currentUser || { id: 'mock-user-id-from-profile', username: 'mockedUser', name: 'Mocked User Profile', email: 'mocked@example.com' }
+      currentUser || { id: 'mock-user-id-from-profile', username: 'mockedUser', name: 'Mocked User Profile', email: 'mocked@example.com', language: 'en' } // Added language
     ), 500));
   }
   try {
