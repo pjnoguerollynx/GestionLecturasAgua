@@ -17,26 +17,78 @@ const LoginScreen = ({ navigation }: Props) => {
   const { t } = useTranslation();
   const { theme } = useTheme();
   const isLoading = useAuthStore((state) => state.isLoading);
-  const LogoComponent = theme.LogoComponent; // Get LogoComponent from theme
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const LogoComponent = theme.LogoComponent;
 
-  const [username, setUsername] = useState('testuser'); // Default for testing
-  const [password, setPassword] = useState('password123'); // Default for testing
+  const [username, setUsername] = useState('testuser');
+  const [password, setPassword] = useState('password123');
+
+  console.log('LoginScreen: Component rendered. Current state:', {
+    isLoading,
+    isAuthenticated,
+    username,
+    password
+  });
+
+  // Force reset loading state on component mount if it's stuck
+  React.useEffect(() => {
+    console.log('LoginScreen: useEffect - Component mounted');
+    if (isLoading && !isAuthenticated) {
+      console.log('LoginScreen: useEffect - Detected stuck loading state, forcing reset');
+      useAuthStore.getState().setIsLoading(false);
+    }
+  }, []); // Empty dependency array ensures this runs only on mount
 
   const handleLogin = async () => {
+    // Add guard clause here
+    if (useAuthStore.getState().isLoading) {
+      console.log('LoginScreen: handleLogin - Login attempt aborted, already loading.');
+      return;
+    }
+    console.log('LoginScreen: handleLogin called');
+    
     try {
+      console.log(`LoginScreen: About to call AuthService.login for user: ${username}`);
       const user = await AuthService.login(username, password);
+      console.log('LoginScreen: AuthService.login completed. Returned user:', user);
+      console.log('LoginScreen: Current auth state after login attempt:', {
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        isLoading: useAuthStore.getState().isLoading,
+        user: useAuthStore.getState().user
+      });
+      
       if (user) {
-        // Navigation to Home will be handled by the conditional navigator
-        // based on isAuthenticated state, so no explicit navigation.navigate('Home') here.
-        console.log('Login successful, user:', user);
+        console.log('LoginScreen: Login successful, user logged in:', user);
       } else {
+        console.error('LoginScreen: Login failed - user is null');
         Alert.alert(t('login.errorTitle'), t('login.errorMessage'));
       }
     } catch (error: any) {
-      console.error('Login screen error:', error);
+      console.error('LoginScreen: Login error caught:', error);
       Alert.alert(t('login.errorTitle'), error.message ?? t('login.errorMessage'));
+    } finally {
+      console.log('LoginScreen: Login finally block. Current isLoading:', useAuthStore.getState().isLoading);
+      
+      // Force isLoading to false as a failsafe
+      if (useAuthStore.getState().isLoading) {
+        console.log('LoginScreen: Forcing isLoading to false');
+        useAuthStore.getState().setIsLoading(false);
+      }
+      
+      console.log('LoginScreen: Final state after login attempt:', {
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        isLoading: useAuthStore.getState().isLoading,
+        user: useAuthStore.getState().user ? 'USER_EXISTS' : 'NO_USER'
+      });
     }
   };
+
+  // Add button press logging
+  const onLoginButtonPress = () => {
+    handleLogin();
+  };
+
+  console.log('LoginScreen: About to render. isLoading:', isLoading);
 
   return (
     <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
@@ -68,13 +120,22 @@ const LoginScreen = ({ navigation }: Props) => {
         accessibilityLabel={t('login.passwordPlaceholder')}
         accessibilityHint={t('login.passwordHint')} 
       />
+      
+      {/* Debug info */}
+      <Text style={{ color: theme.colors.text, fontSize: 12, marginBottom: 10 }}>
+        Debug - Loading: {isLoading ? 'YES' : 'NO'}, Auth: {isAuthenticated ? 'YES' : 'NO'}
+      </Text>
+      
       {isLoading ? (
-        <ActivityIndicator size="large" color={theme.colors.primary} accessibilityLabel={t('login.loading')} />
+        <View style={styles.loadingContainer}> 
+          <ActivityIndicator size="large" color={theme.colors.primary} accessibilityLabel={t('login.loading')} />
+          <Text style={{ color: theme.colors.text, marginTop: 10 }}>{t('login.loadingText')}</Text> 
+        </View>
       ) : (
         <View style={styles.buttonContainer}>
             <Button 
                 title={t('login.loginButton')} 
-                onPress={handleLogin} 
+                onPress={onLoginButtonPress}
                 color={theme.colors.primary} 
             />
         </View>
@@ -93,6 +154,13 @@ const styles = StyleSheet.create({
   logoContainer: {
     marginBottom: 30,
     alignItems: 'center',
+  },
+  loadingContainer: { // ADDED for consistent layout during loading
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 20, // Match button container or general padding
+    width: '90%', // Match button container width
+    marginTop: 10, // Match button container margin
   },
   title: {
     fontSize: 28, // Slightly larger title

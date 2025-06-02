@@ -3,7 +3,7 @@ import { View, StyleSheet, SafeAreaView, FlatList } from 'react-native';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { getAllMeters, getMeterById } from '../database/meterRepository';
-import { getRouteMetersByRouteId } from '../database/routeMeterRepository';
+import { getMetersByRouteId } from '../database/routeMeterRepository'; // Cambiar nombre aquí
 import { Meter } from '../types/databaseModels';
 import { ActivityIndicator, Card, Text, Button, useTheme, List, Chip, Appbar, Icon, Searchbar, MD3Theme } from 'react-native-paper';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -71,7 +71,7 @@ const MetersScreen = () => {
         let fetchedMetersData: Meter[] = [];
         if (routeId) {
           console.log(`MetersScreen: Fetching meters for routeId: ${routeId}`);
-          const routeMeters = await getRouteMetersByRouteId(routeId);
+          const routeMeters = await getMetersByRouteId(routeId); // Cambiar nombre aquí también
           if (routeMeters && routeMeters.length > 0) {
             const meterPromises = routeMeters.map(rm => getMeterById(rm.meterId));
             const metersFromRoute = (await Promise.all(meterPromises)).filter(meter => meter !== null) as Meter[];

@@ -108,6 +108,24 @@ const RoutesScreen = () => {
           )}
         </Card.Content>
       )}
+      <Card.Actions>
+        <Button 
+          mode="outlined" 
+          compact
+          icon="map"
+          onPress={() => navigation.navigate('RouteMap', { routeId: item.id })}
+        >
+          Ver en Mapa
+        </Button>
+        <Button 
+          mode="contained" 
+          compact
+          icon="counter"
+          onPress={() => navigation.navigate('Meters', { params: { routeId: item.id, routeName: item.name ?? t('routesScreen.unnamedRoute') } })}
+        >
+          Ver Contadores
+        </Button>
+      </Card.Actions>
     </Card>
   );
 

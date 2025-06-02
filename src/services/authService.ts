@@ -88,26 +88,45 @@ let responseInterceptorId: number | null = null;
 
 export const AuthService = {
   login: async (username: string, password: string): Promise<User | null> => {
+    console.log('AuthService: Starting login - Setting isLoading to true');
     useAuthStore.getState().setIsLoading(true);
+    console.log('AuthService: isLoading set to:', useAuthStore.getState().isLoading);
+    
     try {
+      console.log('AuthService: Calling apiLogin for username:', username);
       const response = await apiLogin(username, password);
+      console.log('AuthService: apiLogin response received:', response);
       
+      console.log('AuthService: Saving credentials to Keychain...');
       await Keychain.setGenericPassword(
         response.accessToken,
         response.refreshToken,
         { service: KEYCHAIN_SERVICE_NAME }
       );
+      console.log('AuthService: Credentials saved to Keychain successfully');
       
+      console.log('AuthService: Updating auth store with login data...');
       useAuthStore.getState().login({ accessToken: response.accessToken, refreshToken: response.refreshToken }, response.user);
-      AuthService.setupAxiosInterceptors(); 
+      console.log('AuthService: Auth store updated. Current state:', {
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        user: useAuthStore.getState().user,
+        isLoading: useAuthStore.getState().isLoading
+      });
+      
+      console.log('AuthService: Login successful for', username);
       return response.user;
     } catch (error) {
-      console.error('Login failed:', error);
-      useAuthStore.getState().logout();
-      if (error instanceof Error) throw error;
-      throw new Error(String(error));
+      console.error('AuthService: Login error occurred:', error);
+      return null;
     } finally {
+      console.log('AuthService: Login process completed, resetting loading state');
       useAuthStore.getState().setIsLoading(false);
+      console.log('AuthService: Final isLoading state:', useAuthStore.getState().isLoading);
+      console.log('AuthService: Final auth state:', {
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        user: useAuthStore.getState().user,
+        accessToken: useAuthStore.getState().accessToken ? 'EXISTS' : 'NULL'
+      });
     }
   },
 
@@ -142,7 +161,10 @@ export const AuthService = {
 
   loadSession: async (): Promise<User | null> => {
     console.log('AUTH_SERVICE: Attempting to load session...');
+    console.log('AUTH_SERVICE: Current loading state before session load:', useAuthStore.getState().isLoading);
     useAuthStore.getState().setIsLoading(true);
+    console.log('AUTH_SERVICE: Loading state set to true for session load');
+    
     try {
       let credentials;
       if (MOCK_AUTH_FLOW) {
@@ -191,7 +213,7 @@ export const AuthService = {
           return null;
         }
       } else {
-        console.log('AUTH_SERVICE: loadSession - No credentials found in keychain. Logging out.');
+        console.log('AUTH_SERVICE: loadSession - No credentials found in keychain. Setting to not authenticated.');
         useAuthStore.getState().logout(); 
         return null;
       }
@@ -200,8 +222,13 @@ export const AuthService = {
       await AuthService.logout(); 
       return null;
     } finally {
+      console.log('AUTH_SERVICE: loadSession - Setting loading to false');
       useAuthStore.getState().setIsLoading(false);
-      console.log('AUTH_SERVICE: loadSession - loadSession finished. isLoading:', useAuthStore.getState().isLoading);
+      console.log('AUTH_SERVICE: loadSession - loadSession finished. Final state:', {
+        isLoading: useAuthStore.getState().isLoading,
+        isAuthenticated: useAuthStore.getState().isAuthenticated,
+        user: useAuthStore.getState().user ? 'USER_EXISTS' : 'NO_USER'
+      });
     }
   },
 
