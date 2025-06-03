@@ -19,6 +19,7 @@ import { useAuthStore } from '../store/authStore';
 import { format } from 'date-fns';
 import uuid from 'react-native-uuid';
 import { launchCamera, ImagePickerResponse, MediaType } from 'react-native-image-picker';
+import OCRReadingComponent from '../components/OCRReadingComponent';
 
 type CreateReadingScreenNavigationProp = StackNavigationProp<RootStackParamList, 'CreateReading'>;
 type CreateReadingScreenRouteProp = RouteProp<RootStackParamList, 'CreateReading'>;
@@ -39,6 +40,7 @@ const CreateReadingScreen: React.FC<CreateReadingScreenProps> = ({ navigation, r
   const [notes, setNotes] = useState('');
   const [photoUri, setPhotoUri] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOCR, setShowOCR] = useState(false);
   
   // Validation
   const [readingError, setReadingError] = useState('');
@@ -123,6 +125,7 @@ const CreateReadingScreen: React.FC<CreateReadingScreenProps> = ({ navigation, r
         );
       } else if (response.assets && response.assets.length > 0 && response.assets[0].uri) {
         setPhotoUri(response.assets[0].uri);
+        setShowOCR(false); // Hide OCR when taking a new photo
       }
     });
   };
@@ -139,10 +142,32 @@ const CreateReadingScreen: React.FC<CreateReadingScreenProps> = ({ navigation, r
         {
           text: t('common.delete'),
           style: 'destructive',
-          onPress: () => setPhotoUri(null),
+          onPress: () => {
+            setPhotoUri(null);
+            setShowOCR(false);
+          },
         },
       ]
     );
+  };
+
+  const handleOCRReading = (detectedReading: string) => {
+    setReading(detectedReading);
+    setShowOCR(false);
+    if (readingError) {
+      validateReading(detectedReading);
+    }
+  };
+
+  const toggleOCR = () => {
+    if (!photoUri) {
+      Alert.alert(
+        t('createReadingScreen.ocr.errorTitle'),
+        'Primero debe tomar una foto para usar el análisis automático.'
+      );
+      return;
+    }
+    setShowOCR(!showOCR);
   };
 
   const handleSaveReading = async () => {
@@ -278,6 +303,12 @@ const CreateReadingScreen: React.FC<CreateReadingScreenProps> = ({ navigation, r
                       style={styles.photoButton}
                     />
                     <IconButton
+                      icon="text-recognition"
+                      mode="contained"
+                      onPress={toggleOCR}
+                      style={[styles.photoButton, styles.ocrButton]}
+                    />
+                    <IconButton
                       icon="delete"
                       mode="contained"
                       onPress={removePhoto}
@@ -301,6 +332,15 @@ const CreateReadingScreen: React.FC<CreateReadingScreenProps> = ({ navigation, r
                     {t('createReadingScreen.camera.optional')}
                   </Text>
                 </View>
+              )}
+              
+              {/* OCR Component */}
+              {showOCR && photoUri && (
+                <OCRReadingComponent
+                  photoUri={photoUri}
+                  onReadingSelected={handleOCRReading}
+                  onClose={() => setShowOCR(false)}
+                />
               )}
             </View>
           </Card.Content>
@@ -406,6 +446,9 @@ const styles = StyleSheet.create({
   },
   photoButton: {
     margin: 4,
+  },
+  ocrButton: {
+    backgroundColor: '#2196F3',
   },
   deleteButton: {
     backgroundColor: '#f44336',

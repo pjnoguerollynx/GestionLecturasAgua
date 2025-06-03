@@ -605,6 +605,28 @@
       "errorMessage": "Could not access camera. Please try again.",
       "removeTitle": "Remove Photo",
       "removeMessage": "Are you sure you want to remove this photo?"
+    },
+    "ocr": {
+      "title": "AI Automatic Reading",
+      "description": "Use artificial intelligence to automatically read the meter number from the photo",
+      "analyzePhoto": "Analyze Photo",
+      "processing": "Analyzing...",
+      "processingText": "Analyzing image to detect numbers...",
+      "autoDetectedTitle": "Number Detected",
+      "autoDetectedMessage": "Automatically detected reading: {{reading}}. Would you like to use it?",
+      "useReading": "Use This Reading",
+      "bestMatch": "Best Match",
+      "otherSuggestions": "Other Suggestions",
+      "confirmTitle": "Confirm Reading",
+      "confirmMessage": "Would you like to use reading {{reading}}?",
+      "highConfidence": "High confidence",
+      "mediumConfidence": "Medium confidence",
+      "lowConfidence": "Low confidence",
+      "noNumbersDetected": "No numbers detected in image",
+      "tryDifferentAngle": "Try taking the photo from a different angle or with better lighting",
+      "tryAgain": "Try Again",
+      "errorTitle": "Analysis Error",
+      "errorMessage": "Could not analyze image. Please try again."
     }
   },
   "months": {

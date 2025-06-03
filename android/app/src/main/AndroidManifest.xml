@@ -10,6 +10,13 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <!-- Optional: if your app targets Android 10 (API level 29) or higher and needs to access location in the background -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    
+    <!-- Vision Camera permissions -->
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+    
+    <!-- Camera features -->
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false" />
 
 
     <application

@@ -523,6 +523,28 @@
       "errorMessage": "No se pudo acceder a la cámara. Por favor inténtelo de nuevo.",
       "removeTitle": "Eliminar Foto",
       "removeMessage": "¿Está seguro de que desea eliminar esta foto?"
+    },
+    "ocr": {
+      "title": "Lectura Automática con IA",
+      "description": "Use inteligencia artificial para leer automáticamente el número del contador desde la foto",
+      "analyzePhoto": "Analizar Foto",
+      "processing": "Analizando...",
+      "processingText": "Analizando la imagen para detectar números...",
+      "autoDetectedTitle": "Número Detectado",
+      "autoDetectedMessage": "Se detectó automáticamente la lectura: {{reading}}. ¿Desea usarla?",
+      "useReading": "Usar Esta Lectura",
+      "bestMatch": "Mejor Coincidencia",
+      "otherSuggestions": "Otras Sugerencias",
+      "confirmTitle": "Confirmar Lectura",
+      "confirmMessage": "¿Desea usar la lectura {{reading}}?",
+      "highConfidence": "Alta confianza",
+      "mediumConfidence": "Confianza media",
+      "lowConfidence": "Baja confianza",
+      "noNumbersDetected": "No se detectaron números en la imagen",
+      "tryDifferentAngle": "Intente tomar la foto desde un ángulo diferente o con mejor iluminación",
+      "tryAgain": "Intentar de Nuevo",
+      "errorTitle": "Error de Análisis",
+      "errorMessage": "No se pudo analizar la imagen. Por favor, inténtelo de nuevo."
     }
   }
 }
