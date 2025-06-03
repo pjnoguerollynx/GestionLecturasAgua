@@ -511,6 +511,18 @@
     "errors": {
       "noUser": "Error: Usuario no autenticado. Por favor inicie sesión nuevamente.",
       "saveFailed": "Error al guardar la lectura. Por favor inténtelo de nuevo."
+    },
+    "camera": {
+      "title": "Evidencia Fotográfica",
+      "takePhoto": "Tomar Foto",
+      "optional": "(Opcional)",
+      "permissionTitle": "Permiso de Cámara",
+      "permissionMessage": "Esta aplicación necesita acceso a la cámara para tomar fotos de los contadores de agua.",
+      "openSettings": "Abrir Configuración",
+      "errorTitle": "Error de Cámara",
+      "errorMessage": "No se pudo acceder a la cámara. Por favor inténtelo de nuevo.",
+      "removeTitle": "Eliminar Foto",
+      "removeMessage": "¿Está seguro de que desea eliminar esta foto?"
     }
   }
 }

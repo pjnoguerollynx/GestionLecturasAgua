@@ -13,6 +13,7 @@ const mapRowToReading = (row: any): Reading => {
     latitude: row.latitude,
     longitude: row.longitude,
     notes: row.notes,
+    photoUri: row.photoUri,
     syncStatus: row.syncStatus,
     lastModified: row.lastModified,
     userId: row.userId,
@@ -53,8 +54,8 @@ export const addReading = async (
   const newId = uuid.v4();
 
   const query = `
-    INSERT INTO Readings (id, meterId, readingValue, readingDate, readingType, latitude, longitude, isAnomaly, notes, userId, syncStatus, lastModified, version, serverId, routeId)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', strftime('%s','now'), 0, ?, ?);
+    INSERT INTO Readings (id, meterId, readingValue, readingDate, readingType, latitude, longitude, isAnomaly, notes, photoUri, userId, syncStatus, lastModified, version, serverId, routeId)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'pending', strftime('%s','now'), 0, ?, ?);
   `;
 
   const params = [
@@ -67,6 +68,7 @@ export const addReading = async (
     readingData.longitude,
     isAnomaly ? 1 : 0, // Explicitly insert isAnomaly (not from Reading interface)
     readingData.notes,
+    readingData.photoUri, // Add photoUri field
     readingData.userId,
     readingData.serverId, // from Reading interface
     readingData.routeId,  // from Reading interface
@@ -539,6 +541,8 @@ const prepareReadingUpdateQuery = (
 
             if (typedKey === 'value') {
                 dbColumnName = 'readingValue';
+            } else if (typedKey === 'photoUri') {
+                dbColumnName = 'photoUri';
             } else if (typedKey === 'isAnomaly' && typeof valueToSet === 'boolean') {
                 valueToSet = valueToSet ? 1 : 0;
             }

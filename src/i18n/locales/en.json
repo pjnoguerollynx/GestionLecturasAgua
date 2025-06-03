@@ -590,8 +590,21 @@
     "success": {
       "readingSaved": "The reading has been saved successfully and will sync when connection is available."
     },
-    "error": {
-      "failedToSave": "Failed to save reading. Please try again."
+    "errors": {
+      "noUser": "Error: User not authenticated. Please log in again.",
+      "saveFailed": "Failed to save reading. Please try again."
+    },
+    "camera": {
+      "title": "Photo Evidence",
+      "takePhoto": "Take Photo",
+      "optional": "(Optional)",
+      "permissionTitle": "Camera Permission",
+      "permissionMessage": "This app needs camera access to take photos of water meters.",
+      "openSettings": "Open Settings",
+      "errorTitle": "Camera Error",
+      "errorMessage": "Could not access camera. Please try again.",
+      "removeTitle": "Remove Photo",
+      "removeMessage": "Are you sure you want to remove this photo?"
     }
   },
   "months": {

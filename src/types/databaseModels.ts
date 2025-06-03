@@ -44,6 +44,7 @@ export interface Reading {
     notes?: string;
     latitude?: number;
     longitude?: number;
+    photoUri?: string; // Local path to the photo taken as evidence
     syncStatus: SyncStatusType;
     lastModified: number; // Unix timestamp (seconds)
     userId?: string; // User who took the reading

@@ -142,6 +142,54 @@ const createTables = async (database: SQLiteDatabase): Promise<void> => {
     });
     console.log('DB_SERVICE: createTables - Transaction 2 for ReadingsSimple committed successfully.');
 
+    // Drop Readings table before creating it to ensure schema updates
+    console.log('DB_SERVICE: createTables - Starting Transaction for DROP Readings table...');
+    await database.transaction(async (tx) => {
+      console.log('DB_SERVICE: createTables - Tx_DropReadings: Inside. Dropping Readings table if it exists...');
+      try {
+        await tx.executeSql('DROP TABLE IF EXISTS Readings;');
+        console.log('DB_SERVICE: createTables - Tx_DropReadings: DROP TABLE IF EXISTS Readings SQL executed successfully.');
+      } catch (error: any) {
+        console.error('DB_SERVICE: createTables - Tx_DropReadings: ERROR dropping "Readings" table:', error?.message, error);
+        throw error;
+      }
+    });
+    console.log('DB_SERVICE: createTables - Transaction for DROP Readings committed successfully.');
+
+    // Transaction 2b: Create Readings table
+    console.log('DB_SERVICE: createTables - Starting Transaction 2b for Readings table...');
+    await database.transaction(async (tx) => {
+      console.log('DB_SERVICE: createTables - Tx2b: Inside. Creating Readings table...');
+      try {
+        await tx.executeSql(`
+          CREATE TABLE IF NOT EXISTS Readings (
+            id TEXT PRIMARY KEY NOT NULL,
+            meterId TEXT NOT NULL,
+            readingValue REAL NOT NULL,
+            readingDate INTEGER NOT NULL,
+            readingType TEXT DEFAULT 'normal',
+            latitude REAL,
+            longitude REAL,
+            isAnomaly INTEGER DEFAULT 0,
+            notes TEXT,
+            photoUri TEXT,
+            userId TEXT,
+            syncStatus TEXT DEFAULT 'pending',
+            lastModified INTEGER DEFAULT (strftime('%s', 'now')),
+            serverId TEXT,
+            routeId TEXT,
+            version INTEGER DEFAULT 0,
+            FOREIGN KEY (meterId) REFERENCES Meters (id) ON DELETE CASCADE
+          );
+        `);
+        console.log('DB_SERVICE: createTables - Tx2b: Table "Readings" creation SQL executed successfully.');
+      } catch (error: any) {
+        console.error('DB_SERVICE: createTables - Tx2b: ERROR creating "Readings" table:', error?.message, error);
+        throw error;
+      }
+    });
+    console.log('DB_SERVICE: createTables - Transaction 2b for Readings committed successfully.');
+
     // Drop Incidents table before creating it to ensure schema updates
     console.log('DB_SERVICE: createTables - Starting Transaction for DROP Incidents table...');
     await database.transaction(async (tx) => {
