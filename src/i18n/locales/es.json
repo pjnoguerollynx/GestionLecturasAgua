@@ -339,7 +339,15 @@
       "dangerousArea": "El área del contador es peligrosa.",
       "meterDamaged": "El contador está dañado.",
       "other": "Otro problema de acceso."
-    }
+    },
+    "relatedIncidents": "Incidencias Relacionadas",
+    "noIncidentsFound": "No se encontraron incidencias para este contador.",
+    "readingsHistory": "Historial de Lecturas",
+    "noReadingsFound": "No se encontraron lecturas para este contador.",
+    "viewAllReadings": "Ver Todas las Lecturas",
+    "errorFetchingMeter": "Error al cargar los datos del contador",
+    "errorFetchingIncidents": "Error al cargar las incidencias relacionadas",
+    "location": "Ubicación"
   },
   "incidentsScreen": {
     "title": "Incidencias",
@@ -467,5 +475,42 @@
     "oct": "Oct",
     "nov": "Nov",
     "dec": "Dic"
+  },
+  "createReadingScreen": {
+    "title": "Nueva Lectura Manual",
+    "meterInfo": {
+      "serialNumber": "Número de Serie",
+      "date": "Fecha y Hora"
+    },
+    "form": {
+      "reading": "Lectura del Contador",
+      "notes": "Notas Adicionales",
+      "notesPlaceholder": "Agregar comentarios adicionales (opcional)...",
+      "saveReading": "Guardar Lectura"
+    },
+    "validation": {
+      "readingRequired": "La lectura es obligatoria",
+      "invalidReading": "La lectura debe ser un número válido mayor o igual a 0"
+    },
+    "location": {
+      "title": "Ubicación",
+      "captured": "Ubicación capturada",
+      "notAvailable": "Ubicación no disponible",
+      "loading": "Obteniendo ubicación...",
+      "permissionTitle": "Permiso de Ubicación",
+      "permissionMessage": "Esta aplicación necesita acceso a la ubicación para asociar las lecturas con coordenadas geográficas.",
+      "info": {
+        "captured": "Ubicación capturada correctamente:\nLatitud: {{latitude}}\nLongitud: {{longitude}}",
+        "notCaptured": "No se pudo capturar la ubicación automáticamente. La lectura se guardará sin coordenadas de ubicación."
+      },
+      "modalText": "La ubicación GPS ayuda a identificar exactamente dónde se realizó la lectura del medidor. Esta información es útil para verificar que la lectura corresponde al medidor correcto."
+    },
+    "success": {
+      "readingSaved": "La lectura ha sido guardada exitosamente y se sincronizará cuando esté disponible la conexión."
+    },
+    "errors": {
+      "noUser": "Error: Usuario no autenticado. Por favor inicie sesión nuevamente.",
+      "saveFailed": "Error al guardar la lectura. Por favor inténtelo de nuevo."
+    }
   }
 }

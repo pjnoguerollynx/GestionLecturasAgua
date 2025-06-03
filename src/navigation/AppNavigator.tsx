@@ -9,6 +9,7 @@ import CreateIncidentScreen from '../screens/CreateIncidentScreen';
 import IncidentDetailScreen from '../screens/IncidentDetailScreen'; 
 import SettingsScreen from '../screens/SettingsScreen';
 import MeterDetailScreen from '../screens/MeterDetailScreen'; 
+import CreateReadingScreen from '../screens/CreateReadingScreen';
 import RouteMapScreen from '../screens/RouteMapScreen';
 import { useAuthStore } from '../store/authStore';
 import { useTranslation } from 'react-i18next';
@@ -25,6 +26,7 @@ export type RootStackParamList = {
   Settings: undefined;
   MeterDetail: { meterId: string; serialNumber: string }; 
   RouteMap: { routeId: string };
+  CreateReading: { meterId: string; serialNumber: string };
   // Add other screens here
 };
 
@@ -59,6 +61,7 @@ const AppNavigator = () => {
           <Stack.Screen name="CreateIncident" component={CreateIncidentScreen} options={{ title: t('createIncidentScreen.title') }} />
           <Stack.Screen name="IncidentDetail" component={IncidentDetailScreen} options={{ title: t('incidentDetailScreen.title') }} />
           <Stack.Screen name="MeterDetail" component={MeterDetailScreen} options={{ title: t('meterDetailScreen.title') }} />
+          <Stack.Screen name="CreateReading" component={CreateReadingScreen} options={{ title: t('createReadingScreen.title') }} />
           <Stack.Screen 
             name="RouteMap" 
             component={RouteMapScreen}

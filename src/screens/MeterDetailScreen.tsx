@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Alert, TouchableOpacity } from 'react-native';
-import { Appbar, Card, Text, useTheme, Button, Portal, Modal, TextInput, SegmentedButtons, FAB, List, ActivityIndicator, Divider } from 'react-native-paper';
+import { Appbar, Card, Text, useTheme, Button, Portal, Modal, TextInput, SegmentedButtons, List, ActivityIndicator, Divider } from 'react-native-paper';
 import { useNavigation, useRoute, RouteProp } from '@react-navigation/native';
 import { useTranslation } from 'react-i18next';
 import { RootStackParamList } from '../navigation/AppNavigator';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import { getMeterById } from '../database/meterRepository';
 import { addIncident, getIncidentsByMeterId } from '../database/incidentRepository'; // Import getIncidentsByMeterId
-import { Meter, Incident, IncidentSeverity, IncidentStatus } from '../types/databaseModels';
+import { getReadingsByMeterId } from '../database/readingRepository';
+import { Meter, Incident, IncidentSeverity, IncidentStatus, Reading } from '../types/databaseModels';
 import { useAuthStore } from '../store/authStore';
 // @ts-ignore 
 import { format } from 'date-fns';
@@ -37,6 +38,8 @@ const MeterDetailScreen = () => {
   const [submitting, setSubmitting] = useState(false);
   const [relatedIncidents, setRelatedIncidents] = useState<Incident[]>([]);
   const [loadingIncidents, setLoadingIncidents] = useState(false);
+  const [readingHistory, setReadingHistory] = useState<Reading[]>([]);
+  const [loadingReadings, setLoadingReadings] = useState(false);
 
   const fetchMeterData = useCallback(async () => {
     setLoading(true);
@@ -45,6 +48,7 @@ const MeterDetailScreen = () => {
       setMeter(meterData);
       if (meterData) {
         setLoadingIncidents(true);
+        setLoadingReadings(true);
         try {
           const incidents = await getIncidentsByMeterId(meterData.id);
           setRelatedIncidents(incidents);
@@ -53,6 +57,16 @@ const MeterDetailScreen = () => {
           Alert.alert(t('common.error'), t('meterDetailScreen.errorFetchingIncidents'));
         } finally {
           setLoadingIncidents(false);
+        }
+
+        try {
+          const readings = await getReadingsByMeterId(meterData.id);
+          setReadingHistory(readings);
+        } catch (error) {
+          console.error('Error fetching reading history:', error);
+          Alert.alert(t('common.error'), 'Error fetching reading history');
+        } finally {
+          setLoadingReadings(false);
         }
       }
     } catch (error) {
@@ -74,7 +88,7 @@ const MeterDetailScreen = () => {
   const handleSubmitAccessIssue = async () => {
     if (!meter) return;
 
-    if (!currentUser || !currentUser.id) {
+    if (!currentUser?.id) {
       Alert.alert(t('common.error'), t('common.pleaseLogin')); 
       return;
     }
@@ -171,7 +185,7 @@ const MeterDetailScreen = () => {
                   <Text variant="bodyMedium">{`${t('meterDetailScreen.location')}: ${meter.locationLatitude}, ${meter.locationLongitude}`}</Text>
                 )}
                 <Text variant="bodySmall">{`${t('common.lastModified')}: ${format(new Date(meter.lastModified * 1000), 'Pp', { locale: currentLocale })}`}</Text>
-                <Text variant="bodySmall">{`${t('common.syncStatus')}: ${t(`syncStatus.${meter.syncStatus}`, meter.syncStatus)}`}</Text>
+                <Text variant="bodySmall">{`${t('common.syncStatus')}: ${t(`syncStatus.${meter.syncStatus}` as any, meter.syncStatus)}`}</Text>
               </>
             )}
           </Card.Content>
@@ -184,11 +198,7 @@ const MeterDetailScreen = () => {
               mode="contained"
               onPress={() => {
                 if (meter) {
-                  // ADVERTENCIA: La siguiente línea utiliza 'as any' para suprimir un error de TypeScript.
-                  // La causa probable del error es una definición incorrecta o faltante para 'CreateReading'
-                  // en RootStackParamList (definida en src/navigation/AppNavigator.ts).
-                  // La solución ideal es corregir RootStackParamList.
-                  navigation.navigate('CreateReading' as any, { meterId: meter.id, serialNumber: meter.serialNumber });
+                  navigation.navigate('CreateReading', { meterId: meter.id, serialNumber: meter.serialNumber });
                 }
               }}
               style={styles.actionButton}
@@ -236,12 +246,45 @@ const MeterDetailScreen = () => {
           </Card.Content>
         </Card>
 
-        {/* Placeholder for Readings History */}
+        {/* Reading History */}
         <Card style={styles.card}>
           <Card.Title title={t('meterDetailScreen.readingsHistory')} />
           <Card.Content>
-            <Text>{t('common.noData')}</Text>
-            {/* Future: List readings history for this meter */}
+            {loadingReadings ? (
+              <ActivityIndicator animating={true} />
+            ) : readingHistory.length > 0 ? (
+              readingHistory.slice(0, 10).map((reading, index) => (
+                <React.Fragment key={reading.id}>
+                  <List.Item
+                    title={`${t('createReadingScreen.form.reading')}: ${reading.value}`}
+                    description={
+                      `${t('createReadingScreen.meterInfo.date')}: ${format(new Date(reading.readingDate * 1000), 'Pp', { locale: currentLocale })}` +
+                      (reading.notes ? ` - ${reading.notes}` : '') +
+                      (reading.latitude && reading.longitude ? ` - ${t('meterDetailScreen.location')}: ${reading.latitude.toFixed(6)}, ${reading.longitude.toFixed(6)}` : '') +
+                      ` - ${t('common.syncStatus')}: ${t(`syncStatus.${reading.syncStatus}` as any, reading.syncStatus)}`
+                    }
+                    left={props => <List.Icon {...props} icon="water" />}
+                    titleNumberOfLines={1}
+                    descriptionNumberOfLines={3}
+                  />
+                  {index < Math.min(readingHistory.length, 10) - 1 && <Divider />}
+                </React.Fragment>
+              ))
+            ) : (
+              <Text>{t('meterDetailScreen.noReadingsFound')}</Text>
+            )}
+            {readingHistory.length > 10 && (
+              <Button
+                mode="text"
+                onPress={() => {
+                  // Future: Navigate to full reading history screen
+                  Alert.alert(t('common.info'), 'Full reading history view coming soon');
+                }}
+                style={{ marginTop: 8 }}
+              >
+                {t('meterDetailScreen.viewAllReadings')} ({readingHistory.length})
+              </Button>
+            )}
           </Card.Content>
         </Card>
 

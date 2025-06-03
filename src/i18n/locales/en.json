@@ -436,7 +436,15 @@
       "dangerousArea": "The meter area is dangerous.",
       "meterDamaged": "The meter is damaged.",
       "other": "Other access issue."
-    }
+    },
+    "relatedIncidents": "Related Incidents",
+    "noIncidentsFound": "No incidents found for this meter.",
+    "readingsHistory": "Reading History",
+    "noReadingsFound": "No readings found for this meter.",
+    "viewAllReadings": "View All Readings",
+    "errorFetchingMeter": "Error loading meter data",
+    "errorFetchingIncidents": "Error loading related incidents",
+    "location": "Location"
   },
   "incidentsScreen": {
     "title": "Incidents",
@@ -549,6 +557,42 @@
     "syncSuccessNoChanges": "Sync completed. No changes.",
     "syncFailed": "Sync failed. Retrying later.",
     "syncFailedNoConnection": "Sync failed. Check your connection."
+  },
+  "createReadingScreen": {
+    "title": "New Manual Reading",
+    "meterInfo": {
+      "serialNumber": "Serial Number",
+      "date": "Date and Time"
+    },
+    "form": {
+      "reading": "Meter Reading",
+      "notes": "Additional Notes",
+      "notesPlaceholder": "Add additional comments (optional)...",
+      "saveReading": "Save Reading"
+    },
+    "validation": {
+      "readingRequired": "Reading is required",
+      "invalidReading": "Reading must be a valid number greater than or equal to 0"
+    },
+    "location": {
+      "title": "Location",
+      "captured": "Location captured",
+      "notAvailable": "Location not available",
+      "loading": "Getting location...",
+      "permissionTitle": "Location Permission",
+      "permissionMessage": "This application needs access to location to associate readings with geographic coordinates.",
+      "info": {
+        "captured": "Location captured successfully:\nLatitude: {{latitude}}\nLongitude: {{longitude}}",
+        "notCaptured": "Could not capture location automatically. The reading will be saved without location coordinates."
+      },
+      "modalText": "GPS location helps identify exactly where the meter reading was taken. This information is useful to verify that the reading corresponds to the correct meter."
+    },
+    "success": {
+      "readingSaved": "The reading has been saved successfully and will sync when connection is available."
+    },
+    "error": {
+      "failedToSave": "Failed to save reading. Please try again."
+    }
   },
   "months": {
     "jan": "Jan",
