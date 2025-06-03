@@ -384,6 +384,7 @@ export interface ServerReading { // Added export keyword
     readingType?: string;
     isAnomaly?: boolean;
     routeId?: string;
+    photoUrl?: string; // Server photo URL after successful upload
 }
 
 export const reconcileCreatedReading = async (localId: string, serverReading: ServerReading): Promise<void> => {
@@ -400,7 +401,7 @@ export const reconcileCreatedReading = async (localId: string, serverReading: Se
     const updateQuery = `
         UPDATE Readings
         SET serverId = ?, meterId = ?, readingDate = ?, readingValue = ?, notes = ?, latitude = ?, longitude = ?, userId = ?,
-            syncStatus = 'synced', lastModified = ?, version = ?, readingType = ?, isAnomaly = ?, routeId = ?
+            photoUri = ?, syncStatus = 'synced', lastModified = ?, version = ?, readingType = ?, isAnomaly = ?, routeId = ?
         WHERE id = ?;`; 
 
     const lastModified = serverReading.updatedAt ? Math.floor(new Date(serverReading.updatedAt).getTime() / 1000) : Math.floor(Date.now() / 1000);
@@ -411,6 +412,11 @@ export const reconcileCreatedReading = async (localId: string, serverReading: Se
         anomalyDbValue = serverReading.isAnomaly ? 1 : 0;
     }
 
+    // If photo was successfully uploaded, clear local photoUri and store server photoUrl
+    // If photo was successfully uploaded, clear local photoUri and store server photoUrl
+    // For now, we'll clear photoUri after successful sync to avoid keeping local files
+    const photoUriForDb = serverReading.photoUrl ? null : undefined;
+
     await executeSql(updateQuery, [
         serverReading.id, 
         serverReading.meterId,
@@ -420,6 +426,7 @@ export const reconcileCreatedReading = async (localId: string, serverReading: Se
         serverReading.latitude,
         serverReading.longitude,
         serverReading.userId,
+        photoUriForDb, // Clear local photoUri if photo was uploaded to server
         lastModified,
         serverReading.version,
         serverReading.readingType ?? null, 

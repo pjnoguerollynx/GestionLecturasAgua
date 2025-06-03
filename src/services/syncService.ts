@@ -156,6 +156,96 @@ const makeApiCall = async (
     }
 };
 
+// Photo upload functionality for readings with photos
+const uploadPhoto = async (photoUri: string, token: string | null): Promise<{ success: boolean; data?: any; errorDetails?: any }> => {
+    const formData = new FormData();
+    
+    // Extract filename from the URI or create a default one
+    const filename = photoUri.split('/').pop() || `photo_${Date.now()}.jpg`;
+    
+    formData.append('photo', {
+        uri: photoUri,
+        type: 'image/jpeg',
+        name: filename,
+    } as any);
+
+    const headers: Record<string, string> = {
+        'Content-Type': 'multipart/form-data',
+    };
+    
+    if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+    }
+
+    const config: AxiosRequestConfig = {
+        method: 'POST',
+        url: `${API_BASE_URL}/photos/upload`,
+        data: formData,
+        headers,
+        timeout: API_TIMEOUT * 2, // Double timeout for photo uploads
+    };
+
+    try {
+        const response: AxiosResponse = await axios(config);
+        console.log('Photo uploaded successfully:', response.data);
+        return { success: true, data: response.data };
+    } catch (error) {
+        const axiosError = error as AxiosError;
+        console.error('Photo upload failed:', axiosError.response?.data ?? axiosError.message);
+        let errorDetails: any = { message: axiosError.message, code: axiosError.code };
+        if (axiosError.response) {
+            errorDetails = { ...errorDetails, status: axiosError.response.status, data: axiosError.response.data };
+        }
+        return { success: false, errorDetails };
+    }
+};
+
+// Enhanced API call function that handles photo uploads for readings
+const makeApiCallWithPhoto = async (
+    method: 'POST' | 'PUT' | 'DELETE',
+    url: string,
+    payload: any,
+    token: string | null
+): Promise<ApiCallResult> => {
+    // Check if this is a reading with a photo
+    if ((method === 'POST' || method === 'PUT') && payload.photoUri) {
+        try {
+            // First, upload the photo
+            const photoUploadResult = await uploadPhoto(payload.photoUri, token);
+            
+            if (!photoUploadResult.success) {
+                console.error('Failed to upload photo, proceeding without photo');
+                // Continue with reading sync but without photo
+                const payloadWithoutPhoto = { ...payload };
+                delete payloadWithoutPhoto.photoUri;
+                return makeApiCall(method, url, payloadWithoutPhoto, token);
+            }
+
+            // If photo upload succeeded, update payload with photo URL from server
+            const updatedPayload = {
+                ...payload,
+                photoUrl: photoUploadResult.data?.url || photoUploadResult.data?.photoUrl,
+                photoUri: undefined, // Remove local photoUri
+            };
+
+            // Remove undefined photoUri to avoid sending it
+            delete updatedPayload.photoUri;
+            
+            console.log('Photo uploaded successfully, proceeding with reading sync');
+            return makeApiCall(method, url, updatedPayload, token);
+        } catch (error) {
+            console.error('Error during photo upload process:', error);
+            // Fallback: proceed with reading sync without photo
+            const payloadWithoutPhoto = { ...payload };
+            delete payloadWithoutPhoto.photoUri;
+            return makeApiCall(method, url, payloadWithoutPhoto, token);
+        }
+    } else {
+        // No photo to upload, proceed normally
+        return makeApiCall(method, url, payload, token);
+    }
+};
+
 // Helper function to handle data reconciliation based on operation type
 const handleReconciliation = async (item: OfflineQueueItem, payloadObject: any, serverResponseData: any) => {
     const localEntityId = item.entityId;
@@ -376,7 +466,12 @@ const processQueueItem = async (item: OfflineQueueItem): Promise<void> => {
 
     console.log(`Sync: Attempting ${apiDetails.method} ${apiDetails.url} for item ${item.id} (Attempt: ${currentAttempts + 1})`);
     const token = useAuthStore.getState().accessToken;
-    const result = await makeApiCall(apiDetails.method, apiDetails.url, payloadObject, token);
+    
+    // Use enhanced API call for reading operations that might have photos
+    const isReadingOperation = item.operationType.startsWith('CREATE_READING') || item.operationType.startsWith('UPDATE_READING');
+    const result = isReadingOperation 
+        ? await makeApiCallWithPhoto(apiDetails.method, apiDetails.url, payloadObject, token)
+        : await makeApiCall(apiDetails.method, apiDetails.url, payloadObject, token);
 
     if (result.success) {
         console.log(`Sync: Item ${item.id} (${item.operationType}) synced successfully with server.`);
